@@ -44,7 +44,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     List<LatLng> locationList = new ArrayList<>();
     private CountDownTimer countDownTimer;
-
+    //Guarda la posicion del ultimo circulo colocado
+    private Location ultimoCirculo = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,18 +79,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
 
-
-
-
-                CircleOptions circleOptions = new CircleOptions()
-                        .center(new LatLng(location.getLatitude(), location.getLongitude()))
-                        .radius(accuracy)
-                        .strokeWidth(3)
-                        .strokeColor(Color.BLACK) // Color oscuro
-                        .fillColor(color); // Utiliza el color seleccionado del gradiente
-                mMap.clear(); // Limpiamos cualquier círculo anterior
-                mMap.addCircle(circleOptions);
-
+                boolean colocar = false;
+                // Cuando este esté ajustado se puede hacer una lista de localización de circulos
+                // y comprobar que no se sobrepone ningun circulo
+                if(ultimoCirculo==null||location.distanceTo(ultimoCirculo)>20) {
+                    colocar = true;
+                    ultimoCirculo=location;
+                }
+                if(colocar) {
+                    CircleOptions circleOptions = new CircleOptions()
+                            .center(new LatLng(location.getLatitude(), location.getLongitude()))
+                            //.radius(accuracy)
+                            .radius(10)
+                            .strokeWidth(3)
+                            .strokeColor(Color.BLACK) // Color oscuro
+                            .fillColor(color); // Utiliza el color seleccionado del gradiente
+                    // Limpiamos el mapa de circulos
+                    //mMap.clear(); // Limpiamos cualquier círculo anterior
+                    mMap.addCircle(circleOptions);
+                }
                //cogemos la ubicacion actual
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 String text = location.getLatitude() + " " + location.getLongitude();
