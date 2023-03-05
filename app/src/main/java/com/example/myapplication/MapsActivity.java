@@ -46,6 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private CountDownTimer countDownTimer;
     //Guarda la posicion del ultimo circulo colocado
     private Location ultimoCirculo = null;
+    private double radio = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,17 +81,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
                 boolean colocar = false;
-                // Cuando este esté ajustado se puede hacer una lista de localización de circulos
-                // y comprobar que no se sobrepone ningun circulo
-                if(ultimoCirculo==null||location.distanceTo(ultimoCirculo)>20) {
+                if(location!=null&&(ultimoCirculo==null||location.distanceTo(ultimoCirculo)>=radio*2)) {
                     colocar = true;
+                    if(ultimoCirculo!=null) {    //Este codigo es para dibujar los circulos pegados
+                        double[] vector = { location.getLatitude()-ultimoCirculo.getLatitude(), location.getLongitude() - ultimoCirculo.getLongitude()};
+                        double distancia = location.distanceTo(ultimoCirculo); // Math.sqrt(Math.pow(vector[0], 2) + Math.pow(vector[1], 2));
+                        location.setLatitude(ultimoCirculo.getLatitude() + vector[0] * 2 * radio/distancia);
+                        location.setLongitude(ultimoCirculo.getLongitude() + vector[1] * 2 * radio/distancia);
+                    }
                     ultimoCirculo=location;
                 }
                 if(colocar) {
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(location.getLatitude(), location.getLongitude()))
                             //.radius(accuracy)
-                            .radius(10)
+                            .radius(radio)
                             .strokeWidth(3)
                             .strokeColor(Color.BLACK) // Color oscuro
                             .fillColor(color); // Utiliza el color seleccionado del gradiente
