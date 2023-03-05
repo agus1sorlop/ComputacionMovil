@@ -46,7 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private CountDownTimer countDownTimer;
     //Guarda la posicion del ultimo circulo colocado
     private Location ultimoCirculo = null;
-    private double radio = 1;
+    private double radio = 6;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
