@@ -12,7 +12,7 @@ public class Circulo {
 
     @SerializedName("location")
     @Expose
-    private Location location;
+    private String location;
     @SerializedName("grade")
     @Expose
     private int grade;
@@ -31,13 +31,13 @@ public class Circulo {
      * @param location
      * @param grade
      */
-    public Circulo(Location location, int grade) {
+    public Circulo(String location, int grade) {
         super();
         this.location = location;
         this.grade = grade;
     }
 
-    public Location getLocation() {
+    public String getLocation() {
         return location;
     }
 

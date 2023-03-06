@@ -10,18 +10,26 @@
         android:id="@+id/textView2"
         android:layout_width="208dp"
         android:layout_height="162dp"
-        android:layout_marginEnd="84dp"
-        android:layout_marginBottom="464dp"
+        android:layout_marginEnd="88dp"
+        android:layout_marginBottom="524dp"
         android:text="TextView"
         app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+    <com.jjoe64.graphview.GraphView
+        android:id="@+id/grafica"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_marginBottom="120dp"
+        app:layout_constraintBottom_toTopOf="@+id/button5"
         app:layout_constraintEnd_toEndOf="parent" />
 
     <Button
         android:id="@+id/button5"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="167dp"
-        android:layout_marginBottom="236dp"
+        android:layout_marginEnd="144dp"
+        android:layout_marginBottom="108dp"
         android:onClick="onButtonPressed"
         android:text="loc"
         app:layout_constraintBottom_toBottomOf="parent"

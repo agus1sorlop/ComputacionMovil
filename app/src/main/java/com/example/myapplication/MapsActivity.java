@@ -51,6 +51,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private JsonObject res;
     private JsonArray circulosArray;
+    int[] colors = {Color.GREEN, Color.YELLOW, Color.RED};
     List<LatLng> locationList = new ArrayList<>();
     private CountDownTimer countDownTimer;
     //Guarda la posicion del ultimo circulo colocado
@@ -90,7 +91,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 if(colocar) {
                     //esto es para mostrar los colores segun la cantidad de cobertura que haya
-                    int[] colors = {Color.GREEN, Color.YELLOW, Color.RED};
                     GradientDrawable gradient = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
 
                     //para saber la cantidad de cobertura que tenemos
@@ -112,7 +112,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //mMap.clear(); // Limpiamos cualquier círculo anterior
                     mMap.addCircle(circleOptions);
                     // Añadir datos al fichero
-                    Circulo circulo = new Circulo(location, colorIndex);
+                    Circulo circulo = new Circulo(location.toString(), colorIndex);
                     añadirCirculo(circulo);
                 }
                //cogemos la ubicacion actual
