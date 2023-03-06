@@ -8,6 +8,7 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -24,88 +25,49 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.Priority;
 import com.google.android.gms.tasks.OnSuccessListener;
 
+import java.io.IOException;
+
 public class LocationActivity extends AppCompatActivity {
 
-    private FusedLocationProviderClient client;
     private TextView textView;
-    private LocationCallback callback;
+
+    private static final String FILENAME="circulos.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_location);
-        client = LocationServices.getFusedLocationProviderClient(this);
         textView = findViewById(R.id.textView2);
-        callback = new LocationCallback() {
-            @Override
-            public void onLocationResult(@NonNull LocationResult locationResult) {
-                System.out.print("holaaaaa");
-                super.onLocationResult(locationResult);
-                Location location = locationResult.getLastLocation();
-                textView = findViewById(R.id.textView2);
-                String text = location.getLatitude() + " " + location.getLongitude();
-                textView.setText(text);
-            }
-        };
     }
 
     public void onButtonPressed(View v){
-        //showLastLocation();
         showLocationUpdates();
     }
 
-    public void showLastLocation() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION
-            }, 0);
-
-            return;
-        }
-        client.getLastLocation().addOnSuccessListener(this,new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(Location location) {
-                String text = location.getLatitude() + " " + location.getLongitude();
-                textView.setText(text);
-                System.out.print("jee");
-            }
-        });
-    }
-
     public void showLocationUpdates(){
-        LocationRequest locationRequest = new LocationRequest.Builder(2000).setMinUpdateIntervalMillis(1000).setPriority(Priority.PRIORITY_HIGH_ACCURACY).build();
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this,new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_COARSE_LOCATION
-            }, 0);
-            return;
+        String cadena = null;
+        try {
+            cadena = StorageHelper.readStringFromFile(FILENAME,this);
+        } catch (IOException e) {
+            Log.e("MainActivity","Error reading file: ",e);
         }
-        client.requestLocationUpdates(locationRequest, callback, null);
+        if(cadena!=null){
+            textView.setText(cadena);
+        }else{
+            textView.setText("Fichero vacio");
+        }
+
     }
 
-    @Override
+    /*@Override
     protected void onPause(){
         super.onPause();
         stopLocationUpdates();
     }
-
+    Faltaria onResume!!!!!
     private void stopLocationUpdates(){
         client.removeLocationUpdates(callback);
     }
+    */
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults){
-        super.onRequestPermissionsResult(requestCode,permissions,grantResults);
-        switch(requestCode){
-            case 0:{
-                if(grantResults.length >0 && grantResults[0]== PackageManager.PERMISSION_GRANTED){
-                    showLastLocation();
-                }else{
-                    Toast.makeText(this,"Need permission to work", Toast.LENGTH_SHORT).show();
-                }
-            }
-        }
-
-    }
 }

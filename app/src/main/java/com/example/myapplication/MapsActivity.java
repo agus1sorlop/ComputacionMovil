@@ -2,7 +2,7 @@ package com.example.myapplication;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
@@ -12,6 +12,7 @@ import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -31,8 +32,12 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.example.myapplication.databinding.ActivityMapsBinding;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -42,6 +47,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FusedLocationProviderClient client;
     private LocationCallback callback;
 
+    private static final String FILENAME="circulos.json";
+
+    private JsonObject res;
+    private JsonArray circulosArray;
     List<LatLng> locationList = new ArrayList<>();
     private CountDownTimer countDownTimer;
     //Guarda la posicion del ultimo circulo colocado
@@ -60,25 +69,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         client = LocationServices.getFusedLocationProviderClient(this);
+        res=new JsonObject();
+        circulosArray=new JsonArray();
         callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 Location location = locationResult.getLastLocation();
-                //esto es para mostrar los colores segun la cantidad de cobertura que haya
-                int[] colors = {Color.GREEN, Color.YELLOW, Color.RED};
-                GradientDrawable gradient = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
-
-                //para saber la cantidad de cobertura que tenemos
-                float accuracy = location.getAccuracy();
-                //para medirla entre 0 y 1 y convertirla a un color Gradient
-                float value = Math.min(accuracy / 100.0f, 1.0f);
-                int colorIndex = (int) (value * (colors.length - 1));
-                int color = colors[colorIndex];
-                //añadimos el color para pasarlo al circulo
-                gradient.setColor(color);
-
-
 
                 boolean colocar = false;
                 if(location!=null&&(ultimoCirculo==null||location.distanceTo(ultimoCirculo)>=radio*2)) {
@@ -92,6 +89,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     ultimoCirculo=location;
                 }
                 if(colocar) {
+                    //esto es para mostrar los colores segun la cantidad de cobertura que haya
+                    int[] colors = {Color.GREEN, Color.YELLOW, Color.RED};
+                    GradientDrawable gradient = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
+
+                    //para saber la cantidad de cobertura que tenemos
+                    float accuracy = location.getAccuracy();
+                    //para medirla entre 0 y 1 y convertirla a un color Gradient
+                    float value = Math.min(accuracy / 100.0f, 1.0f);
+                    int colorIndex = (int) (value * (colors.length - 1));
+                    int color = colors[colorIndex];
+                    //añadimos el color para pasarlo al circulo
+                    gradient.setColor(color);
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(location.getLatitude(), location.getLongitude()))
                             //.radius(accuracy)
@@ -102,6 +111,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // Limpiamos el mapa de circulos
                     //mMap.clear(); // Limpiamos cualquier círculo anterior
                     mMap.addCircle(circleOptions);
+                    // Añadir datos al fichero
+                    Circulo circulo = new Circulo(location, colorIndex);
+                    añadirCirculo(circulo);
                 }
                //cogemos la ubicacion actual
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
@@ -144,6 +156,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
      showPosition();
 
+    }
+
+    private void añadirCirculo(Circulo circulo){
+        circulosArray.add(circulo.toJson());
+        res.add("circulos", circulosArray);
+        try {
+            StorageHelper.saveStringToFile(FILENAME,res.toString(),this);
+        } catch (IOException e) {
+            Log.e("MainActivity","Error saving file: ",e);
+        }
     }
 
     private void showPosition(){
