@@ -6,6 +6,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.FragmentActivity;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
@@ -79,6 +80,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         client = LocationServices.getFusedLocationProviderClient(this);
         res=new JsonObject();
         circulosArray=new JsonArray();
+        telephonyManager=(TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -98,7 +100,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
                 if(colocar) {
                     int colorIndex = getLevel();
-                    int color = colors[colorIndex];
+                    int color = colors[4-colorIndex];
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(location.getLatitude(), location.getLongitude()))
                             .radius(radio)
@@ -220,8 +222,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             return 0;
         }
-        if(telephonyManager==null)
-            return 0;
         List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
         int signal = 0;
         for(CellInfo info : cellInfoList){
@@ -233,6 +233,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
         return signal;
+    }
+
+    public void nuevaEtapa(View v){
+
     }
 
 }
