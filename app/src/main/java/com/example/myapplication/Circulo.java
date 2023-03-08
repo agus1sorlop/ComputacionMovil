@@ -16,6 +16,12 @@ public class Circulo {
     @SerializedName("grade")
     @Expose
     private int grade;
+    @SerializedName("etapa")
+    @Expose
+    private int etapa;
+    @SerializedName("circuloEtapa")
+    @Expose
+    private int circuloEtapa;
 
     private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();
 
@@ -30,8 +36,10 @@ public class Circulo {
      *
      * @param location
      * @param grade
+     * @param etapa
+     * @param circuloEtapa
      */
-    public Circulo(String location, int grade) {
+    public Circulo(String location, int grade, int etapa, int circuloEtapa) {
         super();
         this.location = location;
         this.grade = grade;
@@ -47,6 +55,14 @@ public class Circulo {
 
     public void setGrade(int grade) {
         this.grade = grade;
+    }
+
+    public int getEtapa() {
+        return etapa;
+    }
+
+    public int getCirculoEtapa() {
+        return circuloEtapa;
     }
 
     public JsonElement toJson(){

@@ -65,6 +65,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     //Guarda la posicion del ultimo circulo colocado
     private Location ultimoCirculo = null;
     private double radio = 6;
+    private int etapa;
+    private int circulosEtapa;
+    private int grosorCirculo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +84,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         res=new JsonObject();
         circulosArray=new JsonArray();
         telephonyManager=(TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        etapa=1;
+        circulosEtapa=0;
+        grosorCirculo=3;
         callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -104,14 +110,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(location.getLatitude(), location.getLongitude()))
                             .radius(radio)
-                            .strokeWidth(3)
+                            .strokeWidth(grosorCirculo)
                             .strokeColor(Color.BLACK) // Color oscuro
                             .fillColor(color); // Utiliza el color seleccionado del gradiente
+                    circulosEtapa++;
                     // Limpiamos el mapa de circulos
                     //mMap.clear(); // Limpiamos cualquier círculo anterior
                     mMap.addCircle(circleOptions);
                     // Añadir datos al fichero
-                    Circulo circulo = new Circulo(location.toString(), colorIndex);
+                    Circulo circulo = new Circulo(location.toString(), colorIndex, etapa, circulosEtapa);
                     añadirCirculo(circulo);
                 }
                //cogemos la ubicacion actual
@@ -236,7 +243,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void nuevaEtapa(View v){
-
+        if(circulosEtapa>0){
+            etapa++;
+            circulosEtapa=0;
+            if(grosorCirculo==3){
+                grosorCirculo=6;
+            }else{
+                grosorCirculo=3;
+            }
+        }
     }
 
 }
