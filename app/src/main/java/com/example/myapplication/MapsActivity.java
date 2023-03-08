@@ -10,9 +10,15 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.telephony.CellIdentityLte;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoLte;
+import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,11 +53,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FusedLocationProviderClient client;
     private LocationCallback callback;
 
+    private TelephonyManager telephonyManager;
     private static final String FILENAME="circulos.json";
 
     private JsonObject res;
     private JsonArray circulosArray;
-    int[] colors = {Color.GREEN, Color.YELLOW, Color.RED};
+    int[] colors = {Color.rgb(0,100,0),Color.GREEN, Color.YELLOW, Color.rgb(255,165,0), Color.RED};
     List<LatLng> locationList = new ArrayList<>();
     private CountDownTimer countDownTimer;
     //Guarda la posicion del ultimo circulo colocado
@@ -90,20 +97,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     ultimoCirculo=location;
                 }
                 if(colocar) {
-                    //esto es para mostrar los colores segun la cantidad de cobertura que haya
-                    GradientDrawable gradient = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, colors);
-
-                    //para saber la cantidad de cobertura que tenemos
-                    float accuracy = location.getAccuracy();
-                    //para medirla entre 0 y 1 y convertirla a un color Gradient
-                    float value = Math.min(accuracy / 100.0f, 1.0f);
-                    int colorIndex = (int) (value * (colors.length - 1));
+                    int colorIndex = getLevel();
                     int color = colors[colorIndex];
-                    //añadimos el color para pasarlo al circulo
-                    gradient.setColor(color);
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(location.getLatitude(), location.getLongitude()))
-                            //.radius(accuracy)
                             .radius(radio)
                             .strokeWidth(3)
                             .strokeColor(Color.BLACK) // Color oscuro
@@ -173,7 +170,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void showLocationUpdates(){
-        LocationRequest locationRequest = new LocationRequest.Builder(2000).setMinUpdateIntervalMillis(5000).setPriority(Priority.PRIORITY_HIGH_ACCURACY).build();
+        LocationRequest locationRequest = new LocationRequest.Builder(2000).setMinUpdateIntervalMillis(2000).setPriority(Priority.PRIORITY_HIGH_ACCURACY).build();
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this,new String[]{
                     android.Manifest.permission.ACCESS_FINE_LOCATION,
@@ -211,6 +208,31 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
+    }
+
+    public int getLevel() {
+        StringBuilder text = new StringBuilder();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE
+            }, 0);
+
+            return 0;
+        }
+        if(telephonyManager==null)
+            return 0;
+        List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
+        int signal = 0;
+        for(CellInfo info : cellInfoList){
+            if(info instanceof CellInfoLte){
+                CellInfoLte cellInfoLte = (CellInfoLte) info;
+                int level = cellInfoLte.getCellSignalStrength().getLevel();
+                if(signal<level)
+                    signal=level;
+            }
+        }
+        return signal;
     }
 
 }

@@ -110,4 +110,5 @@ public class TelephonyActivity extends AppCompatActivity {
         }
         textView.setText(text);
     }
+
 }
