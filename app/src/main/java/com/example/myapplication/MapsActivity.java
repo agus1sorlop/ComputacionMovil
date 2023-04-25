@@ -368,8 +368,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                                     .fillColor(Color.BLUE);
 
                             mMap.addCircle(circleOptions);
+                            cambioAntena=true;
                         }
-                        cambioAntena=true;
                         ultimaAntena = jsonObject;
                     }
                 },
