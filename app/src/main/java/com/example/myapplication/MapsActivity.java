@@ -11,6 +11,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.drawable.GradientDrawable;
 import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -25,6 +27,12 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
@@ -42,10 +50,13 @@ import com.example.myapplication.databinding.ActivityMapsBinding;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
@@ -66,6 +77,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private JsonObject res;
     private JsonArray circulosArray;
+    private JsonArray antenasArray;
+    private JsonObject ultimaAntena;
     int[] colors = {Color.rgb(0, 100, 0), Color.GREEN, Color.YELLOW, Color.rgb(255, 165, 0), Color.RED};
     List<LatLng> locationList = new ArrayList<>();
     private CountDownTimer countDownTimer;
@@ -75,6 +88,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int etapa;
     private int circulosEtapa;
     private int grosorCirculo;
+    private boolean cambioAntena;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,10 +104,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         client = LocationServices.getFusedLocationProviderClient(this);
         res = new JsonObject();
         circulosArray = new JsonArray();
+        antenasArray = new JsonArray();
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         etapa = 1;
+        ultimaAntena=null;
         circulosEtapa = 0;
         grosorCirculo = 3;
+        cambioAntena=false;
         callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -127,6 +144,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // Añadir datos al fichero
                     Circulo circulo = new Circulo(location.toString(), colorIndex, etapa, circulosEtapa);
                     añadirCirculo(circulo);
+                    // añadimos minicirculo si hay cambio de antena
+                    if(cambioAntena) {
+                        circleOptions = new CircleOptions()
+                                .center(new LatLng(location.getLatitude(), location.getLongitude()))
+                                .radius(radio / 3)
+                                .strokeWidth(grosorCirculo)
+                                .strokeColor(Color.BLACK) // Color oscuro
+                                .fillColor(Color.BLACK);
+                        mMap.addCircle(circleOptions);
+                        cambioAntena=false;
+                    }
                 }
                 //cogemos la ubicacion actual
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
@@ -143,8 +171,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //añadimos a la lista de posiciones
                 locationList.add(latLng);
                 //mostramos el punto actual
-                mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19));
+                if(colocar) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19));
+                }
+                try {
+                    obtenerUbicacionAntena();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
             }
 
         };
@@ -169,11 +204,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
         showPosition();
-        try {
-            obtenerUbicacionAntena();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
 
     }
 
@@ -201,7 +231,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         client.requestLocationUpdates(locationRequest, callback, null);
-
     }
 
     @Override
@@ -269,14 +298,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void obtenerUbicacionAntena() throws IOException {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.READ_PHONE_STATE
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.INTERNET
             }, 0);
             return;
         }
         GsmCellLocation cellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
+        if(cellLocation==null)
+            return;
         int mcc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(0, 3));
         int mnc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(3));
         int lac = cellLocation.getLac();
@@ -285,30 +317,69 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setRequestMethod("GET");
-        System.out.println("*++++++++++++++++++++++++"+con.getResponseCode());
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-
-        System.out.println(in);
-        String inputLine;
-        StringBuffer response = new StringBuffer();
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
+        ConnectivityManager connMgr = (ConnectivityManager)
+                getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if (networkInfo != null && networkInfo.isConnected()) {
+            System.out.println("siiii");
+            // Operaciones http
+        } else {
+            System.out.println("nooo");
+            // Mostrar errores
         }
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        // Procesar la respuesta del servidor aquí
+                        System.out.println("eeeee: " + response);
+                        if(response==null)
+                            return;
+                        Gson gson = new Gson();
+                        JsonObject jsonObject = gson.fromJson(response, JsonObject.class);
+                        if(jsonObject.equals(ultimaAntena))
+                            return;
+                        /*for(JsonElement json: antenasArray)
+                            if(json.equals((JsonElement) jsonObject))
+                                return;
+                        antenasArray.add(jsonObject);
+                         */
+                        // coloreamos nueva antena
+                        double latitude = jsonObject.get("lat").getAsDouble();
+                        double longitude = jsonObject.get("lon").getAsDouble();
+                        CircleOptions circleOptions = new CircleOptions()
+                                .center(new LatLng(latitude, longitude))
+                                .radius(radio)
+                                .strokeWidth(grosorCirculo)
+                                .strokeColor(Color.BLACK)
+                                .fillColor(Color.MAGENTA);
 
-        in.close();
-        Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(response.toString(), JsonObject.class);
-        double latitude = jsonObject.get("latitude").getAsDouble();
-        double longitude = jsonObject.get("longitude").getAsDouble();
-        CircleOptions circleOptions = new CircleOptions()
-                .center(new LatLng(latitude, longitude))
-                .radius(radio)
-                .strokeWidth(grosorCirculo)
-                .strokeColor(Color.BLACK)
-                .fillColor(Color.MAGENTA);
+                        mMap.addCircle(circleOptions);
+                        // cambiamos color antena de la antigua antena
+                        if(ultimaAntena!=null) {
+                            latitude = ultimaAntena.get("lat").getAsDouble();
+                            longitude = ultimaAntena.get("lon").getAsDouble();
+                            circleOptions = new CircleOptions()
+                                    .center(new LatLng(latitude, longitude))
+                                    .radius(radio)
+                                    .strokeWidth(grosorCirculo)
+                                    .strokeColor(Color.BLACK)
+                                    .fillColor(Color.BLUE);
 
-        mMap.addCircle(circleOptions);
-
+                            mMap.addCircle(circleOptions);
+                        }
+                        cambioAntena=true;
+                        ultimaAntena = jsonObject;
+                    }
+                },
+                new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        // Manejar el error de la solicitud aquí
+                    }
+                });
+        requestQueue.add(stringRequest);
 
     }
 
