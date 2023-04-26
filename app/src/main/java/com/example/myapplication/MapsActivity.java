@@ -172,8 +172,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 locationList.add(latLng);
                 //mostramos el punto actual
                 if(colocar) {
-                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19));
+                    //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19));
                 }
                 try {
                     obtenerUbicacionAntena();
