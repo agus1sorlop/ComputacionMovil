@@ -1,12 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">PROYECTO GPS</string>
-    <string name="info" translatable="false">INFO</string>
     <string name="mapa">ESTUDIO GPS</string>
     <string name="cobertura">COBERTURA ACTUAL</string>
     <string name="grafica">ESTADISTICAS</string>
+
     <string name="menu">MANAGER</string>
     <string name="title_activity_maps">MAPA</string>
     <string name="etapa">NUEVA ETAPA</string>
-
 
 </resources>

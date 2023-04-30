@@ -80,4 +80,46 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/botonCobertura" />
 
+    <Button
+        android:id="@+id/btn_english"
+        android:layout_width="61dp"
+        android:layout_height="59dp"
+        android:background="@drawable/button_circle"
+        android:text="EN"
+        android:onClick="cambiarIdiomaIngles"
+        android:textColor="@color/purple_200"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.951"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_french"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <Button
+        android:id="@+id/btn_french"
+        android:layout_width="63dp"
+        android:layout_height="56dp"
+        android:background="@drawable/button_circle"
+        android:text="FR"
+        android:onClick="cambiarIdiomaFrances"
+        android:textColor="@color/purple_200"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.954"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn_spanish" />
+
+    <Button
+        android:id="@+id/btn_spanish"
+        android:layout_width="66dp"
+        android:layout_height="51dp"
+        android:background="@drawable/button_circle"
+        android:text="ES"
+        android:onClick="cambiarIdiomaEspanol"
+        android:textColor="@color/purple_200"
+        app:layout_constraintBottom_toTopOf="@+id/btn_french"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.949"
+        app:layout_constraintStart_toEndOf="@+id/logotipoApp"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
