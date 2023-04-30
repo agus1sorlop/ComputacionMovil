@@ -1,52 +1,83 @@
-<?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/ic_launcher_background"
     tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/logotipoApp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_launcher_foreground" />
 
     <TextView
         android:id="@+id/textView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="116dp"
+        android:layout_marginBottom="32dp"
+        android:text="@string/app_name"
+        android:textColor="#17B7F6"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toTopOf="@+id/BotonMapa"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/BotonMapa"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="149dp"
-        android:layout_marginBottom="268dp"
+        android:layout_marginStart="139dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="139dp"
+        android:layout_marginBottom="32dp"
         android:onClick="openMapActivity"
         android:text="@string/mapa"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:textColor="@color/ic_launcher_background"
+        android:textColorLink="@color/teal_200"
+        app:layout_constraintBottom_toTopOf="@+id/botonCobertura"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
-        android:id="@+id/button3"
+        android:id="@+id/botonCobertura"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="169dp"
-        android:layout_marginBottom="110dp"
+        android:layout_marginStart="144dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="144dp"
+        android:layout_marginBottom="32dp"
         android:onClick="openTelActivity"
-        android:text="tele"
-        app:layout_constraintBottom_toTopOf="@+id/textView"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:text="@string/cobertura"
+        android:textColor="@color/ic_launcher_background"
+        app:layout_constraintBottom_toTopOf="@+id/botonGrafica"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/BotonMapa" />
 
     <Button
-        android:id="@+id/button4"
+        android:id="@+id/botonGrafica"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="164dp"
-        android:layout_marginBottom="75dp"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="156dp"
+        android:layout_marginBottom="32dp"
         android:onClick="openLocationActivity"
-        android:text="loc"
-        app:layout_constraintBottom_toTopOf="@+id/button3"
-        app:layout_constraintEnd_toEndOf="parent" />
+        android:text="@string/grafica"
+        android:textColor="@color/ic_launcher_background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/botonCobertura" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
