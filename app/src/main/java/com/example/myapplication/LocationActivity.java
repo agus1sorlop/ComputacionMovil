@@ -30,7 +30,13 @@ import com.jjoe64.graphview.ValueDependentColor;
 import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LocationActivity extends AppCompatActivity {
 
@@ -74,7 +80,7 @@ public class LocationActivity extends AppCompatActivity {
     }
 
     public void showLocationUpdates(){
-        String cadena = null;
+       /* String cadena = null;
         try {
             cadena = StorageHelper.readStringFromFile(FILENAME,this);
         } catch (IOException e) {
@@ -84,7 +90,43 @@ public class LocationActivity extends AppCompatActivity {
             textView.setText(cadena);
         }else{
             textView.setText("Fichero vacio");
-        }
+        }*/
+
+            String jsonString = null;
+            try {
+                jsonString = StorageHelper.readStringFromFile(FILENAME, this);
+            } catch (IOException e) {
+                Log.e("MainActivity", "Error reading file: ", e);
+            }
+            if (jsonString != null) {
+                try {
+                    JSONArray jsonArray = new JSONArray(jsonString);
+                    int length = jsonArray.length();
+                    List<DataPoint> dataPoints = new ArrayList<>(length);
+                    for (int i = 0; i < length; i++) {
+                        JSONObject jsonObject = jsonArray.getJSONObject(i);
+                        double x = jsonObject.getDouble("x");
+                        double y = jsonObject.getDouble("y");
+                        dataPoints.add(new DataPoint(x, y));
+                    }
+                    BarGraphSeries<DataPoint> series = new BarGraphSeries<>(dataPoints.toArray(new DataPoint[0]));
+                    series.setSpacing(50); // ajusta la separación entre las barras
+                    series.setValueDependentColor(new ValueDependentColor<DataPoint>() {
+                        @Override
+                        public int get(DataPoint data) {
+                            return Color.rgb((int) data.getX() * 255 / 4, (int) data.getY() * 255 / 6, 100);
+                        }
+                    });
+                    series.setDrawValuesOnTop(true);
+                    series.setValuesOnTopColor(Color.BLUE);
+                    grafica.addSeries(series);
+                } catch (JSONException e) {
+                    Log.e("MainActivity", "Error parsing JSON: ", e);
+                }
+            } else {
+                textView.setText("Fichero vacio");
+            }
+
 
     }
 

@@ -376,7 +376,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 new Response.ErrorListener() {
                     @Override
                     public void onErrorResponse(VolleyError error) {
-                        // Manejar el error de la solicitud aquí
+                        Log.e("error", "Error en la solicitud: " + error.getMessage());
+                        Toast.makeText(getApplicationContext(), "Error en la solicitud: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+
                     }
                 });
         requestQueue.add(stringRequest);
