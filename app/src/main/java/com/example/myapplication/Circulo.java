@@ -40,9 +40,10 @@ public class Circulo {
      * @param circuloEtapa
      */
     public Circulo(String location, int grade, int etapa, int circuloEtapa) {
-        super();
-        this.location = location;
         this.grade = grade;
+        this.etapa=etapa;
+        this.circuloEtapa=circuloEtapa;
+        this.location = location;
     }
 
     public String getLocation() {

@@ -307,6 +307,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             return;
         }
         GsmCellLocation cellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
+        System.out.println("antenaaa");
         if(cellLocation==null)
             return;
         int mcc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(0, 3));

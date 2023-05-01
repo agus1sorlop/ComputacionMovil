@@ -7,10 +7,14 @@ import androidx.core.app.ActivityCompat;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.View;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -53,26 +57,53 @@ public class LocationActivity extends AppCompatActivity {
         setContentView(R.layout.activity_location);
         textView = findViewById(R.id.textView2);
         grafica = findViewById(R.id.grafica);
-
-        // Datos de las barras
-        BarGraphSeries<DataPoint> series = new BarGraphSeries<>(new DataPoint[]{
-           new DataPoint(0,2),
-           new DataPoint(2,5)
-        });
-        grafica.addSeries(series);
-
-        // Estilo de las barras
-        series.setValueDependentColor(new ValueDependentColor<DataPoint>() {
-            @Override
-            public int get(DataPoint data) {
-                return Color.rgb((int) data.getX()*255/4, (int) data.getY()*255/6,100);
+        String jsonString = null;
+        try {
+            jsonString = StorageHelper.readStringFromFile(FILENAME, this);
+        } catch (IOException e) {
+            Log.e("MainActivity", "Error reading file: ", e);
+        }
+        if (jsonString != null) {
+            int[] array = new int[5];
+            for (int i = 0; i < array.length; i++) {
+                array[i] = 0;
             }
-        });
-        // Espacio entre las barras
-        series.setSpacing(20);
-        //Dibujamos la grafica
-        series.setDrawValuesOnTop(true);
-        series.setValuesOnTopColor(Color.BLUE);
+            try {
+                System.out.println(jsonString);
+                JSONObject jsonObject = new JSONObject(jsonString);
+                System.out.println(jsonObject.get("circulos"));
+                JSONArray jsonArray = new JSONArray(jsonObject.get("circulos").toString());
+                int length = jsonArray.length();
+                List<DataPoint> dataPoints = new ArrayList<>(length);
+                for (int i = 0; i < length; i++) {
+                    jsonObject = jsonArray.getJSONObject(i);
+                    System.out.println(jsonObject);
+                    int grado = jsonObject.getInt("grade");
+                    array[grado]++;
+                }
+                BarGraphSeries<DataPoint> series = new BarGraphSeries<>(new DataPoint[]{
+                        new DataPoint(0,array[0]),
+                        new DataPoint(1,array[1]),
+                        new DataPoint(2,array[2]),
+                        new DataPoint(3,array[3]),
+                        new DataPoint(4,array[4])
+                });
+                series.setSpacing(50); // ajusta la separación entre las barras
+                series.setValueDependentColor(new ValueDependentColor<DataPoint>() {
+                    @Override
+                    public int get(DataPoint data) {
+                        return Color.rgb((int) data.getX() * 255 / 4, (int) data.getY() * 255 / 6, 100);
+                    }
+                });
+                series.setDrawValuesOnTop(true);
+                series.setValuesOnTopColor(Color.BLUE);
+                grafica.addSeries(series);
+            } catch (JSONException e) {
+                Log.e("MainActivity", "Error parsing JSON: ", e);
+            }
+        } else {
+            textView.setText("Fichero vacio");
+        }
     }
 
     public void onButtonPressed(View v){
@@ -80,17 +111,6 @@ public class LocationActivity extends AppCompatActivity {
     }
 
     public void showLocationUpdates(){
-       /* String cadena = null;
-        try {
-            cadena = StorageHelper.readStringFromFile(FILENAME,this);
-        } catch (IOException e) {
-            Log.e("MainActivity","Error reading file: ",e);
-        }
-        if(cadena!=null){
-            textView.setText(cadena);
-        }else{
-            textView.setText("Fichero vacio");
-        }*/
 
             String jsonString = null;
             try {
@@ -100,26 +120,122 @@ public class LocationActivity extends AppCompatActivity {
             }
             if (jsonString != null) {
                 try {
-                    JSONArray jsonArray = new JSONArray(jsonString);
+                    System.out.println(jsonString);
+                    JSONObject jsonObject = new JSONObject(jsonString);
+                    System.out.println(jsonObject.get("circulos"));
+                    JSONArray jsonArray = new JSONArray(jsonObject.get("circulos").toString());
                     int length = jsonArray.length();
                     List<DataPoint> dataPoints = new ArrayList<>(length);
-                    for (int i = 0; i < length; i++) {
-                        JSONObject jsonObject = jsonArray.getJSONObject(i);
-                        double x = jsonObject.getDouble("x");
-                        double y = jsonObject.getDouble("y");
-                        dataPoints.add(new DataPoint(x, y));
-                    }
-                    BarGraphSeries<DataPoint> series = new BarGraphSeries<>(dataPoints.toArray(new DataPoint[0]));
-                    series.setSpacing(50); // ajusta la separación entre las barras
-                    series.setValueDependentColor(new ValueDependentColor<DataPoint>() {
-                        @Override
-                        public int get(DataPoint data) {
-                            return Color.rgb((int) data.getX() * 255 / 4, (int) data.getY() * 255 / 6, 100);
+                    jsonObject = jsonArray.getJSONObject(length-1);
+                    int etapas = jsonObject.getInt("etapa");
+                    int[][] array = new int[etapas][5];
+                    for (int j=0; j < etapas; j++) {
+                        for (int i = 0; i < array.length; i++) {
+                            array[j][i] = 0;
                         }
-                    });
-                    series.setDrawValuesOnTop(true);
-                    series.setValuesOnTopColor(Color.BLUE);
-                    grafica.addSeries(series);
+                    }
+                    for (int i = 0; i < length; i++) {
+                        jsonObject = jsonArray.getJSONObject(i);
+                        System.out.println(jsonObject);
+                        int grado = jsonObject.getInt("grade");
+                        int etapa = jsonObject.getInt("etapa");
+                        array[etapa-1][grado]++;
+                    }
+                    TableLayout tableLayout = findViewById(R.id.tableLayout);
+
+                    // Agrega una fila de encabezado
+                    TableRow headerRow = new TableRow(this);
+                    headerRow.setBackgroundColor(Color.LTGRAY);
+                    headerRow.setLayoutParams(new TableLayout.LayoutParams(
+                            TableLayout.LayoutParams.MATCH_PARENT,
+                            TableLayout.LayoutParams.WRAP_CONTENT));
+
+                    TextView headerTextView1 = new TextView(this);
+                    headerTextView1.setText("Etapa");
+                    headerTextView1.setPadding(8, 8, 8, 8);
+                    headerTextView1.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+                    headerTextView1.setTypeface(headerTextView1.getTypeface(), Typeface.BOLD);
+                    headerRow.addView(headerTextView1);
+
+                    TextView headerTextView2 = new TextView(this);
+                    headerTextView2.setText("Grado 0");
+                    headerTextView2.setPadding(8, 8, 8, 8);
+                    headerTextView2.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+                    headerTextView2.setTypeface(headerTextView2.getTypeface(), Typeface.BOLD);
+                    headerRow.addView(headerTextView2);
+
+                    TextView headerTextView3 = new TextView(this);
+                    headerTextView3.setText("Grado 1");
+                    headerTextView3.setPadding(8, 8, 8, 8);
+                    headerTextView3.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+                    headerTextView3.setTypeface(headerTextView3.getTypeface(), Typeface.BOLD);
+                    headerRow.addView(headerTextView3);
+
+                    TextView headerTextView4 = new TextView(this);
+                    headerTextView4.setText("Grado 2");
+                    headerTextView4.setPadding(8, 8, 8, 8);
+                    headerTextView4.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+                    headerTextView4.setTypeface(headerTextView4.getTypeface(), Typeface.BOLD);
+                    headerRow.addView(headerTextView4);
+
+                    TextView headerTextView5 = new TextView(this);
+                    headerTextView5.setText("Grado 3");
+                    headerTextView5.setPadding(8, 8, 8, 8);
+                    headerTextView5.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+                    headerTextView5.setTypeface(headerTextView5.getTypeface(), Typeface.BOLD);
+                    headerRow.addView(headerTextView5);
+
+                    TextView headerTextView6 = new TextView(this);
+                    headerTextView6.setText("Grado 4");
+                    headerTextView6.setPadding(8, 8, 8, 8);
+                    headerTextView6.setTextSize(TypedValue.COMPLEX_UNIT_SP, 10);
+                    headerTextView6.setTypeface(headerTextView6.getTypeface(), Typeface.BOLD);
+                    headerRow.addView(headerTextView6);
+
+                    tableLayout.addView(headerRow);
+
+                    // Agrega filas de datos
+                    for (int i = 1; i <= etapas; i++) {
+                        TableRow dataRow = new TableRow(this);
+                        dataRow.setLayoutParams(new TableLayout.LayoutParams(
+                                TableLayout.LayoutParams.MATCH_PARENT,
+                                TableLayout.LayoutParams.WRAP_CONTENT));
+
+                        TextView dataTextView = new TextView(this);
+                        dataTextView.setText(""+i);
+                        dataTextView.setPadding(8, 8, 8, 8);
+                        dataRow.addView(dataTextView);
+
+                        TextView dataTextView1 = new TextView(this);
+                        dataTextView1.setText(""+array[i-1][0] );
+                        dataTextView1.setPadding(8, 8, 8, 8);
+                        dataRow.addView(dataTextView1);
+
+                        TextView dataTextView2 = new TextView(this);
+                        dataTextView2.setText(""+array[i-1][1] );
+                        dataTextView2.setPadding(8, 8, 8, 8);
+                        dataRow.addView(dataTextView2);
+
+                        TextView dataTextView3 = new TextView(this);
+                        dataTextView3.setText(""+array[i-1][2] );
+                        dataTextView3.setPadding(8, 8, 8, 8);
+                        dataRow.addView(dataTextView3);
+
+                        TextView dataTextView4 = new TextView(this);
+                        dataTextView4.setText(""+array[i-1][3] );
+                        dataTextView4.setPadding(8, 8, 8, 8);
+                        dataRow.addView(dataTextView4);
+
+                        TextView dataTextView5 = new TextView(this);
+                        dataTextView5.setText(""+array[i-1][4] );
+                        dataTextView5.setPadding(8, 8, 8, 8);
+                        dataRow.addView(dataTextView5);
+
+                        tableLayout.addView(dataRow);
+                    }
+                    textView.setVisibility(View.INVISIBLE);
+                    grafica.setVisibility(View.INVISIBLE);
+
                 } catch (JSONException e) {
                     Log.e("MainActivity", "Error parsing JSON: ", e);
                 }
