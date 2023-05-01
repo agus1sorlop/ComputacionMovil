@@ -116,7 +116,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             public void onLocationResult(@NonNull LocationResult locationResult) {
                 super.onLocationResult(locationResult);
                 Location location = locationResult.getLastLocation();
-
+                System.out.println("callback");
                 boolean colocar = false;
                 if (location != null && (ultimoCirculo == null || location.distanceTo(ultimoCirculo) >= radio * 2)) {
                     colocar = true;
@@ -171,9 +171,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //añadimos a la lista de posiciones
                 locationList.add(latLng);
                 //mostramos el punto actual
-                if(colocar) {
-                    //mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                    //mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19));
+                if(colocar&&circulosEtapa==1) {
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19));
                 }
                 try {
                     obtenerUbicacionAntena();
@@ -334,8 +334,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     public void onResponse(String response) {
                         // Procesar la respuesta del servidor aquí
                         System.out.println("eeeee: " + response);
-                        if(response==null)
+                        if(response==null||response.equals("null")){
                             return;
+                        }
                         Gson gson = new Gson();
                         JsonObject jsonObject = gson.fromJson(response, JsonObject.class);
                         if(jsonObject.equals(ultimaAntena))
