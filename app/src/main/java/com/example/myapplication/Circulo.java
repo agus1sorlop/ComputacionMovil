@@ -16,6 +16,12 @@ public class Circulo {
     @SerializedName("grade")
     @Expose
     private int grade;
+    @SerializedName("halfgrade")
+    @Expose
+    private double halfgrade;
+    @SerializedName("datoscelda")
+    @Expose
+    private String datoscelda;
     @SerializedName("etapa")
     @Expose
     private int etapa;
@@ -36,11 +42,15 @@ public class Circulo {
      *
      * @param location
      * @param grade
+     * @param halfgrade
+     * @param datoscelda
      * @param etapa
      * @param circuloEtapa
      */
-    public Circulo(String location, int grade, int etapa, int circuloEtapa) {
+    public Circulo(String location, int grade, double halfgrade, String datoscelda, int etapa, int circuloEtapa) {
         this.grade = grade;
+        this.halfgrade = halfgrade;
+        this.datoscelda = datoscelda;
         this.etapa=etapa;
         this.circuloEtapa=circuloEtapa;
         this.location = location;
@@ -56,6 +66,10 @@ public class Circulo {
 
     public void setGrade(int grade) {
         this.grade = grade;
+    }
+
+    public double getHalfGrade() {
+        return halfgrade;
     }
 
     public int getEtapa() {

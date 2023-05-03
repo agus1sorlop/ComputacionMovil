@@ -86,6 +86,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private Location ultimoCirculo = null;
     private double radio = 6;
     private int etapa;
+    private String datosCelda = "";
     private int circulosEtapa;
     private int grosorCirculo;
     private boolean cambioAntena;
@@ -142,7 +143,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //mMap.clear(); // Limpiamos cualquier círculo anterior
                     mMap.addCircle(circleOptions);
                     // Añadir datos al fichero
-                    Circulo circulo = new Circulo(location.toString(), colorIndex, etapa, circulosEtapa);
+                    double nivelMedio = getHalfLevel();
+                    Circulo circulo = new Circulo(location.toString(), colorIndex, nivelMedio, datosCelda, etapa, circulosEtapa);
                     añadirCirculo(circulo);
                     // añadimos minicirculo si hay cambio de antena
                     if(cambioAntena) {
@@ -263,7 +265,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public int getLevel() {
-        StringBuilder text = new StringBuilder();
+        datosCelda = "";
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{
                     Manifest.permission.ACCESS_FINE_LOCATION,
@@ -277,12 +279,51 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         for (CellInfo info : cellInfoList) {
             if (info instanceof CellInfoLte) {
                 CellInfoLte cellInfoLte = (CellInfoLte) info;
+                CellIdentityLte id = cellInfoLte.getCellIdentity();
+                StringBuilder text = new StringBuilder();
+                text.append("LTE ID:{cid: ").append(id.getCi());
+                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+                    text.append(" mcc: ").append(id.getMcc());
+                    text.append(" mnc: ").append(id.getMnc());
+                }else{
+                    text.append(" mcc: ").append(id.getMccString());
+                    text.append(" mnc: ").append(id.getMncString());
+                }
+                text.append(" tac: ").append(id.getTac());
+                text.append("} Level: ").append(cellInfoLte.getCellSignalStrength().getLevel()).append("\n");
                 int level = cellInfoLte.getCellSignalStrength().getLevel();
-                if (signal < level)
+                if (signal < level) {
                     signal = level;
+                    datosCelda = text.toString();
+                }
             }
         }
         return signal;
+    }
+
+    public double getHalfLevel() {
+        StringBuilder text = new StringBuilder();
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE
+            }, 0);
+
+            return 0;
+        }
+        List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
+        int signal = 0;
+        int celdas = 0;
+        for (CellInfo info : cellInfoList) {
+            if (info instanceof CellInfoLte) {
+                CellInfoLte cellInfoLte = (CellInfoLte) info;
+                int level = cellInfoLte.getCellSignalStrength().getLevel();
+                signal += level;
+                celdas++;
+            }
+        }
+        if(celdas==0)return 0;
+        return signal/celdas;
     }
 
     public void nuevaEtapa(View v) {
