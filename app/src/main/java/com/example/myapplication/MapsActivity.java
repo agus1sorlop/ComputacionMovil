@@ -17,6 +17,7 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
+import android.os.PowerManager;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoLte;
@@ -93,6 +94,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int grosorCirculo;
     private boolean cambioAntena;
 
+    PowerManager powerManager;
+    PowerManager.WakeLock wakeLock;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -115,6 +119,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         circulosEtapa = 0;
         grosorCirculo = 3;
         cambioAntena=false;
+
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{
+                    android.Manifest.permission.WAKE_LOCK
+            }, 0);
+            return;
+        }
+        wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "MiApp::MyWakeLockTag");
+        wakeLock.acquire();
         callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -257,7 +272,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Cancela el contador
         countDownTimer.cancel();
         stopLocationUpdates();
-
+        wakeLock.release();
     }
 
     private void stopLocationUpdates() {
