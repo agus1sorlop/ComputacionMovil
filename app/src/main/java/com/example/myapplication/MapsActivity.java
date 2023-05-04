@@ -74,6 +74,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private TelephonyManager telephonyManager;
     private static final String FILENAME = "circulos.json";
+    private static final String FILENAME2 = "antenas.json";
 
     private JsonObject res;
     private JsonArray circulosArray;
@@ -214,6 +215,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         res.add("circulos", circulosArray);
         try {
             StorageHelper.saveStringToFile(FILENAME, res.toString(), this);
+        } catch (IOException e) {
+            Log.e("MainActivity", "Error saving file: ", e);
+        }
+    }
+
+    private void añadirAntena(JsonObject antena) {
+        if(antenasArray.contains(antena)){
+            return;
+        }
+        antenasArray.add(antena);
+        try {
+            StorageHelper.saveStringToFile(FILENAME2, antena.toString(), this);
         } catch (IOException e) {
             Log.e("MainActivity", "Error saving file: ", e);
         }
@@ -381,6 +394,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         }
                         Gson gson = new Gson();
                         JsonObject jsonObject = gson.fromJson(response, JsonObject.class);
+                        añadirAntena(jsonObject);
                         if(jsonObject.equals(ultimaAntena))
                             return;
                         /*for(JsonElement json: antenasArray)
