@@ -73,18 +73,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private ActivityMapsBinding binding;
     private FusedLocationProviderClient client;
     private LocationCallback callback;
-
     private TelephonyManager telephonyManager;
     private static final String FILENAME = "circulos.json";
     private static final String FILENAME2 = "antenas.json";
-
     private JsonObject res;
     private JsonArray circulosArray;
     private JsonArray antenasArray;
     private JsonObject ultimaAntena;
     int[] colors = {Color.rgb(0, 100, 0), Color.GREEN, Color.YELLOW, Color.rgb(255, 165, 0), Color.RED};
     List<LatLng> locationList = new ArrayList<>();
-    private CountDownTimer countDownTimer;
+    //private CountDownTimer countDownTimer;
     //Guarda la posicion del ultimo circulo colocado
     private Location ultimoCirculo = null;
     private double radio = 6;
@@ -93,7 +91,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private int circulosEtapa;
     private int grosorCirculo;
     private boolean cambioAntena;
-
     PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
 
@@ -270,7 +267,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         super.onPause();
 
         // Cancela el contador
-        countDownTimer.cancel();
+        //countDownTimer.cancel();
         stopLocationUpdates();
         wakeLock.release();
     }
