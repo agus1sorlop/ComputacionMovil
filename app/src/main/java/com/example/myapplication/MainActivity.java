@@ -18,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void openLocationActivity(View v) {
-        Intent intent = new Intent(this, LocationActivity.class);
+        Intent intent = new Intent(this, GraphActivity.class);
         startActivity(intent);
     }
 
