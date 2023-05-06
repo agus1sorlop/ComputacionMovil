@@ -12,21 +12,27 @@ public class Circulo {
 
     @SerializedName("location")
     @Expose
+    // Contiene la ubicación del centro del circulo
     private String location;
     @SerializedName("grade")
     @Expose
+    // Contendra el nivel máximo de señal
     private int grade;
     @SerializedName("halfgrade")
     @Expose
+    // Contendra el nivel medio de señal
     private double halfgrade;
     @SerializedName("datoscelda")
     @Expose
+    // Contendra los datos de la celda a la que está conectado en ese momento
     private String datoscelda;
     @SerializedName("etapa")
     @Expose
+    // Es el numero de etapa a la que pertenece
     private int etapa;
     @SerializedName("circuloEtapa")
     @Expose
+    // Es el número de circulo dentro de la etapa en la que se encuentra
     private int circuloEtapa;
 
     private static Gson gson = new GsonBuilder().disableHtmlEscaping().setPrettyPrinting().create();

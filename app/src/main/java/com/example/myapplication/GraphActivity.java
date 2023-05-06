@@ -1,14 +1,9 @@
 package com.example.myapplication;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.graphics.Typeface;
-import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.util.TypedValue;
@@ -16,19 +11,7 @@ import android.view.View;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
-import android.widget.Toast;
 
-import android.content.pm.PackageManager;
-import android.os.Bundle;
-import android.widget.Toast;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.Priority;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.ValueDependentColor;
 import com.jjoe64.graphview.series.BarGraphSeries;
@@ -42,14 +25,19 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LocationActivity extends AppCompatActivity {
+public class GraphActivity extends AppCompatActivity {
 
     private TextView textView;
 
-    // O esto o un TableLayout
+    // Gráfica para mostrar los datos completos
     private GraphView grafica;
 
+    // Tabla que mostrará los datos por etapa
+    TableLayout tableLayout;
+
+    // Fichero del que se recogen los datos
     private static final String FILENAME="circulos.json";
+    private boolean tabla;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,12 +46,15 @@ public class LocationActivity extends AppCompatActivity {
         textView = findViewById(R.id.textView2);
         grafica = findViewById(R.id.grafica);
         String jsonString = null;
+        tabla = false;
         try {
             jsonString = StorageHelper.readStringFromFile(FILENAME, this);
         } catch (IOException e) {
             Log.e("MainActivity", "Error reading file: ", e);
         }
         if (jsonString != null) {
+            // Creamos un array de 5 elementos inicializados a 0
+            // Cada elemento corresponde a un nivel de señal
             int[] array = new int[5];
             for (int i = 0; i < array.length; i++) {
                 array[i] = 0;
@@ -75,12 +66,15 @@ public class LocationActivity extends AppCompatActivity {
                 JSONArray jsonArray = new JSONArray(jsonObject.get("circulos").toString());
                 int length = jsonArray.length();
                 List<DataPoint> dataPoints = new ArrayList<>(length);
+                // Recorremos los datos de todos los círculos del recorrido
                 for (int i = 0; i < length; i++) {
                     jsonObject = jsonArray.getJSONObject(i);
                     System.out.println(jsonObject);
+                    // Se incrementa el elemento  del nivel de la señal correspondiente
                     int grado = jsonObject.getInt("grade");
                     array[grado]++;
                 }
+                // Se crea el gráfico de barras con los resultados obtenidos
                 BarGraphSeries<DataPoint> series = new BarGraphSeries<>(new DataPoint[]{
                         new DataPoint(0,array[0]),
                         new DataPoint(1,array[1]),
@@ -107,11 +101,11 @@ public class LocationActivity extends AppCompatActivity {
     }
 
     public void onButtonPressed(View v){
-        showLocationUpdates();
+        if(!tabla)showLocationUpdates();
     }
 
     public void showLocationUpdates(){
-
+            tabla=true;
             String jsonString = null;
             try {
                 jsonString = StorageHelper.readStringFromFile(FILENAME, this);
@@ -128,20 +122,23 @@ public class LocationActivity extends AppCompatActivity {
                     List<DataPoint> dataPoints = new ArrayList<>(length);
                     jsonObject = jsonArray.getJSONObject(length-1);
                     int etapas = jsonObject.getInt("etapa");
+                    // Se inicializa la matriz que contendra los datos de la tabla a 0
                     int[][] array = new int[etapas][5];
                     for (int j=0; j < etapas; j++) {
                         for (int i = 0; i < array.length; i++) {
                             array[j][i] = 0;
                         }
                     }
+                    // Se lee otra vez los datos del fichero con los datos
                     for (int i = 0; i < length; i++) {
                         jsonObject = jsonArray.getJSONObject(i);
                         System.out.println(jsonObject);
                         int grado = jsonObject.getInt("grade");
                         int etapa = jsonObject.getInt("etapa");
+                        // Se aumenta el dato correspondiente
                         array[etapa-1][grado]++;
                     }
-                    TableLayout tableLayout = findViewById(R.id.tableLayout);
+                    tableLayout = findViewById(R.id.tableLayout);
 
                     // Agrega una fila de encabezado
                     TableRow headerRow = new TableRow(this);
@@ -233,6 +230,7 @@ public class LocationActivity extends AppCompatActivity {
 
                         tableLayout.addView(dataRow);
                     }
+                    // Ocultamos el gráfico anterior y el textview
                     textView.setVisibility(View.INVISIBLE);
                     grafica.setVisibility(View.INVISIBLE);
 

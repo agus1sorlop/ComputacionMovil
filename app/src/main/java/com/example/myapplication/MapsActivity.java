@@ -76,23 +76,27 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FusedLocationProviderClient client;
     private LocationCallback callback;
     private TelephonyManager telephonyManager;
+    // Ficheros donde se guardaran los datos de los circulos y las antenas
     private static final String FILENAME = "circulos.json";
     private static final String FILENAME2 = "antenas.json";
     private JsonObject res;
+    // Arrays que guardaran los circulos y antenas pintados
     private JsonArray circulosArray;
     private JsonArray antenasArray;
+    //Guarda la posicion del ultimo circulo colocado
+    private Location ultimoCirculo = null;
     private JsonObject ultimaAntena;
+    private boolean cambioAntena;
+    // Escala de colores que usaremos dependiendo el nivel de señal
     int[] colors = {Color.rgb(0, 100, 0), Color.GREEN, Color.YELLOW, Color.rgb(255, 165, 0), Color.RED};
     List<LatLng> locationList = new ArrayList<>();
     //private CountDownTimer countDownTimer;
-    //Guarda la posicion del ultimo circulo colocado
-    private Location ultimoCirculo = null;
     private double radio = 6;
-    private int etapa;
-    private String datosCelda = "";
-    private int circulosEtapa;
     private int grosorCirculo;
-    private boolean cambioAntena;
+    private int etapa;
+    private int circulosEtapa;
+    private String datosCelda = "";
+    // Nos permitiran tener la pantalla encendida sin necesidad de interaccion
     PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
     private boolean tresge= false;
@@ -116,13 +120,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         res = new JsonObject();
         circulosArray = new JsonArray();
         antenasArray = new JsonArray();
+        ultimaAntena=null;
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         etapa = 1;
-        ultimaAntena=null;
         circulosEtapa = 0;
         grosorCirculo = 3;
         cambioAntena=false;
 
+        // Inicializamos estas variables para mantener la pantalla encendida
         powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
@@ -133,6 +138,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_BRIGHT_WAKE_LOCK, "MiApp::MyWakeLockTag");
         wakeLock.acquire();
+        // Esto se ejecutará siempre que llegue una nueva ubicación
         callback = new LocationCallback() {
             @Override
             public void onLocationResult(@NonNull LocationResult locationResult) {
@@ -150,6 +156,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     }
                     ultimoCirculo = location;
                 }
+                // Si la distancia es suficiente se colocara un nuevo circulo
                 if (colocar) {
 
                     int color = colors[4 - colorIndex];
@@ -189,6 +196,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng, 19));
                 }
                 try {
+                    // Miramos la ubicacion de la antena actual
                     obtenerUbicacionAntena();
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -210,14 +218,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-
-        // Add a marker in Sydney and move the camera
-        //LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-
         showPosition();
-
     }
 
     private void añadirCirculo(Circulo circulo) {
@@ -297,6 +298,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             return 0;
         }
+        // Vamos a obtener los datos de la celda a la que estamos conectados y el nivel de señal
         List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
         int signal = 0;
         for (CellInfo info : cellInfoList) {
@@ -316,6 +318,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 text.append(" tac: ").append(id.getTac());
                 text.append("} Level: ").append(cellInfoLte.getCellSignalStrength().getLevel()).append("\n");
                 int level = cellInfoLte.getCellSignalStrength().getLevel();
+                // Cogemos el valor mas alto de señal
                 if (signal < level) {
                     signal = level;
                     datosCelda = text.toString();
@@ -349,7 +352,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return signal;
     }
 
+<<<<<<< HEAD
 
+=======
+    // Vamos a obtener el nivel medio de señal que tienen las celdas que hay en nuestra ubicación
+>>>>>>> master
     public double getHalfLevel() {
         StringBuilder text = new StringBuilder();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -380,6 +387,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return signal/celdas;
     }
 
+    // Esto se ejecutara cuando pulsemos el boton de nueva etapa
     public void nuevaEtapa(View v) {
         if (circulosEtapa > 0) {
             etapa++;
@@ -466,7 +474,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             cellId = cellLocation.getCi();
         } else {
             return;
+<<<<<<< HEAD
         }
+=======
+        int mcc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(0, 3));
+        int mnc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(3));
+        int lac = cellLocation.getLac();
+        int cellId = cellLocation.getCid();
+        // Realizaremos una cosulta para obtener los datos de la antena a la que estamos conectados
+>>>>>>> master
         String url = "https://data.mongodb-api.com/app/data-fcpji/endpoint/db/getcellinfo?mcc=" + mcc + "&mnc=" + mnc + "&area=" + lac + "&cellid=" + cellId;
 
         URL obj = new URL(url);
@@ -475,14 +491,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ConnectivityManager connMgr = (ConnectivityManager)
                 getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-        if (networkInfo != null && networkInfo.isConnected()) {
-            System.out.println("siiii");
-            // Operaciones http
-        } else {
-            System.out.println("nooo");
-            // Mostrar errores
-        }
+        // Aqui se realiza la consulta
         RequestQueue requestQueue = Volley.newRequestQueue(this);
+        // Tratamos la respuesta obtenida
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
@@ -497,11 +508,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         añadirAntena(jsonObject);
                         if(jsonObject.equals(ultimaAntena))
                             return;
-                        /*for(JsonElement json: antenasArray)
-                            if(json.equals((JsonElement) jsonObject))
-                                return;
-                        antenasArray.add(jsonObject);
-                         */
                         // coloreamos nueva antena
                         double latitude = jsonObject.get("lat").getAsDouble();
                         double longitude = jsonObject.get("lon").getAsDouble();
