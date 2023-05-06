@@ -37,6 +37,7 @@ public class GraphActivity extends AppCompatActivity {
 
     // Fichero del que se recogen los datos
     private static final String FILENAME="circulos.json";
+    private boolean tabla;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +46,7 @@ public class GraphActivity extends AppCompatActivity {
         textView = findViewById(R.id.textView2);
         grafica = findViewById(R.id.grafica);
         String jsonString = null;
+        tabla = false;
         try {
             jsonString = StorageHelper.readStringFromFile(FILENAME, this);
         } catch (IOException e) {
@@ -99,11 +101,11 @@ public class GraphActivity extends AppCompatActivity {
     }
 
     public void onButtonPressed(View v){
-        showLocationUpdates();
+        if(!tabla)showLocationUpdates();
     }
 
     public void showLocationUpdates(){
-
+            tabla=true;
             String jsonString = null;
             try {
                 jsonString = StorageHelper.readStringFromFile(FILENAME, this);
