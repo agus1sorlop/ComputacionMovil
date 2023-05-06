@@ -17,12 +17,13 @@
 
     <TextView
         android:id="@+id/textView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="176dp"
+        android:layout_height="86dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="116dp"
         android:layout_marginBottom="32dp"
         android:text="@string/app_name"
+        android:gravity="center_horizontal"
         android:textColor="#17B7F6"
         android:textSize="24sp"
         android:textStyle="bold"
@@ -30,24 +31,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/BotonMapa"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="139dp"
-        android:layout_marginTop="32dp"
-        android:layout_marginEnd="139dp"
-        android:layout_marginBottom="32dp"
-        android:onClick="openMapActivity"
-        android:text="@string/mapa"
-        android:textColor="@color/ic_launcher_background"
-        android:textColorLink="@color/teal_200"
-        app:layout_constraintBottom_toTopOf="@+id/botonCobertura"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView" />
-
+    <!--
     <Button
         android:id="@+id/botonCobertura"
         android:layout_width="wrap_content"
@@ -63,6 +47,23 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/BotonMapa" />
+-->
+    <Button
+        android:id="@+id/BotonMapa"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="139dp"
+        android:layout_marginTop="176dp"
+        android:layout_marginEnd="139dp"
+        android:layout_marginBottom="32dp"
+        android:onClick="openMapActivity"
+        android:text="@string/mapa"
+        android:textColor="@color/ic_launcher_background"
+        android:textColorLink="@color/teal_200"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView" />
 
     <Button
         android:id="@+id/botonGrafica"
@@ -78,19 +79,19 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/botonCobertura" />
+        app:layout_constraintTop_toBottomOf="@+id/BotonMapa" />
 
     <Button
         android:id="@+id/btn_english"
         android:layout_width="61dp"
         android:layout_height="59dp"
         android:background="@drawable/button_circle"
-        android:text="EN"
         android:onClick="cambiarIdiomaIngles"
+        android:text="EN"
         android:textColor="@color/purple_200"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.951"
+        app:layout_constraintHorizontal_bias="0.954"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_french"
         app:layout_constraintVertical_bias="0.0" />
@@ -100,25 +101,26 @@
         android:layout_width="63dp"
         android:layout_height="56dp"
         android:background="@drawable/button_circle"
-        android:text="FR"
         android:onClick="cambiarIdiomaFrances"
+        android:text="FR"
         android:textColor="@color/purple_200"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.954"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btn_spanish" />
 
+
     <Button
         android:id="@+id/btn_spanish"
         android:layout_width="66dp"
         android:layout_height="51dp"
         android:background="@drawable/button_circle"
-        android:text="ES"
         android:onClick="cambiarIdiomaEspanol"
+        android:text="ES"
         android:textColor="@color/purple_200"
         app:layout_constraintBottom_toTopOf="@+id/btn_french"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.949"
+        app:layout_constraintHorizontal_bias="0.932"
         app:layout_constraintStart_toEndOf="@+id/logotipoApp"
         app:layout_constraintTop_toTopOf="parent" />
 

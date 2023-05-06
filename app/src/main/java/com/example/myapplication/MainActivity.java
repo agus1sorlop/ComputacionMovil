@@ -22,11 +22,6 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    public void openTelActivity(View v) {
-        Intent intent = new Intent(this, TelephonyActivity.class);
-        startActivity(intent);
-    }
-
     public void openMapActivity(View v) {
         Intent intent = new Intent(this, MapsActivity.class);
         startActivity(intent);

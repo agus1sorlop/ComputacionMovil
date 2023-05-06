@@ -19,8 +19,10 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.PowerManager;
 import android.telephony.CellIdentityLte;
+import android.telephony.CellIdentityWcdma;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoLte;
+import android.telephony.CellInfoWcdma;
 import android.telephony.CellLocation;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
@@ -93,7 +95,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean cambioAntena;
     PowerManager powerManager;
     PowerManager.WakeLock wakeLock;
+    private boolean tresge= false;
 
+    private boolean cuatroge= true;
+    int colorIndex;
+    double nivelMedio ;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -145,7 +151,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     ultimoCirculo = location;
                 }
                 if (colocar) {
-                    int colorIndex = getLevel();
+
                     int color = colors[4 - colorIndex];
                     CircleOptions circleOptions = new CircleOptions()
                             .center(new LatLng(location.getLatitude(), location.getLongitude()))
@@ -158,7 +164,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     //mMap.clear(); // Limpiamos cualquier círculo anterior
                     mMap.addCircle(circleOptions);
                     // Añadir datos al fichero
-                    double nivelMedio = getHalfLevel();
+
                     Circulo circulo = new Circulo(location.toString(), colorIndex, nivelMedio, datosCelda, etapa, circulosEtapa);
                     añadirCirculo(circulo);
                     // añadimos minicirculo si hay cambio de antena
@@ -176,16 +182,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //cogemos la ubicacion actual
                 LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
                 String text = location.getLatitude() + " " + location.getLongitude();
-                // LatLng murcia = new LatLng(location.getLatitude(), location.getLongitude());
-
-                //para unir un punto con el otro (simplemente por probar)
-                PolylineOptions polylineOptions = new PolylineOptions()
-                        .addAll(locationList)
-                        .color(Color.GRAY)
-                        .width(5);
-                mMap.addPolyline(polylineOptions);
-
-                //añadimos a la lista de posiciones
                 locationList.add(latLng);
                 //mostramos el punto actual
                 if(colocar&&circulosEtapa==1) {
@@ -304,9 +300,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
         int signal = 0;
         for (CellInfo info : cellInfoList) {
-            if (info instanceof CellInfoLte) {
+            if (info instanceof CellInfoLte && cuatroge) {
                 CellInfoLte cellInfoLte = (CellInfoLte) info;
                 CellIdentityLte id = cellInfoLte.getCellIdentity();
+                // Obtener detalles de la celda LTE
                 StringBuilder text = new StringBuilder();
                 text.append("LTE ID:{cid: ").append(id.getCi());
                 if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
@@ -323,10 +320,35 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     signal = level;
                     datosCelda = text.toString();
                 }
+
+                System.out.println("OPCION 4G");
+            } else if (info instanceof CellInfoWcdma && tresge) {
+
+                System.out.println("OPCION 3G");
+                CellInfoWcdma cellInfoWcdma = (CellInfoWcdma) info;
+                CellIdentityWcdma id = cellInfoWcdma.getCellIdentity();
+                // Obtener detalles de la celda WCDMA
+                StringBuilder text = new StringBuilder();
+                text.append("WCDMA ID:{cid: ").append(id.getCid());
+                if(Build.VERSION.SDK_INT < Build.VERSION_CODES.P){
+                    text.append(" mcc: ").append(id.getMcc());
+                    text.append(" mnc: ").append(id.getMnc());
+                }else{
+                    text.append(" mcc: ").append(id.getMccString());
+                    text.append(" mnc: ").append(id.getMncString());
+                }
+                text.append(" lac: ").append(id.getLac());
+                text.append("} Level: ").append(cellInfoWcdma.getCellSignalStrength().getLevel()).append("\n");
+                int level = cellInfoWcdma.getCellSignalStrength().getLevel();
+                if (signal < level) {
+                    signal = level;
+                    datosCelda = text.toString();
+                }
             }
         }
         return signal;
     }
+
 
     public double getHalfLevel() {
         StringBuilder text = new StringBuilder();
@@ -342,9 +364,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         int signal = 0;
         int celdas = 0;
         for (CellInfo info : cellInfoList) {
-            if (info instanceof CellInfoLte) {
+            if (info instanceof CellInfoLte && cuatroge) {
                 CellInfoLte cellInfoLte = (CellInfoLte) info;
                 int level = cellInfoLte.getCellSignalStrength().getLevel();
+                signal += level;
+                celdas++;
+            }else if( info instanceof CellInfoWcdma && tresge){
+                CellInfoWcdma cellInfoWcdma= (CellInfoWcdma) info;
+                int level = cellInfoWcdma.getCellSignalStrength().getLevel();
                 signal += level;
                 celdas++;
             }
@@ -365,6 +392,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
+    public void obtener4G(View v) {
+
+        System.out.println("Estás usando 4G");
+        cuatroge=true;
+        tresge=false;
+        colorIndex=getLevel();
+        nivelMedio= getHalfLevel();
+    }
+
+    public void obtener3G(View v) {
+        System.out.println("Estás usando 3G");
+        cuatroge=false;
+        tresge=true;
+        colorIndex=getLevel();
+        nivelMedio= getHalfLevel();
+    }
+
+
     private void obtenerUbicacionAntena() throws IOException {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{
@@ -374,15 +419,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }, 0);
             return;
         }
-        GsmCellLocation cellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
-        System.out.println("antenaaa");
-        if(cellLocation==null)
+
+        int mcc;
+        int mnc;
+        int lac;
+        int cellId;
+
+        if (tresge) {
+            GsmCellLocation cellLocation = (GsmCellLocation) telephonyManager.getCellLocation();
+
+            System.out.println("antenaaa 3g");
+            if (cellLocation == null)
+                return;
+            mcc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(0, 3));
+            mnc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(3));
+            lac = cellLocation.getLac();
+            cellId = cellLocation.getCid();
+        } else if (cuatroge) {
+
+            System.out.println("antenaaa 4g");
+            List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
+
+            if (cellInfoList == null || cellInfoList.isEmpty())
+                return;
+
+            CellInfoLte cellInfoLte = null;
+
+            for (CellInfo cellInfo : cellInfoList) {
+                if (cellInfo instanceof CellInfoLte) {
+                    cellInfoLte = (CellInfoLte) cellInfo;
+                    break;
+                }
+            }
+
+            if (cellInfoLte == null)
+                return;
+
+            CellIdentityLte cellLocation = cellInfoLte.getCellIdentity();
+
+            System.out.println("antenaaa");
+            if (cellLocation == null)
+                return;
+            mcc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(0, 3));
+            mnc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(3));
+            lac = cellLocation.getTac();
+            cellId = cellLocation.getCi();
+        } else {
             return;
-        int mcc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(0, 3));
-        int mnc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(3));
-        int lac = cellLocation.getLac();
-        int cellId = cellLocation.getCid();
+        }
         String url = "https://data.mongodb-api.com/app/data-fcpji/endpoint/db/getcellinfo?mcc=" + mcc + "&mnc=" + mnc + "&area=" + lac + "&cellid=" + cellId;
+
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
         con.setRequestMethod("GET");

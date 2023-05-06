@@ -8,10 +8,10 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.telephony.CellIdentity;
 import android.telephony.CellIdentityLte;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoLte;
+import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
@@ -33,10 +33,10 @@ public class TelephonyActivity extends AppCompatActivity {
     }
 
     public void onButtonPressed(View v){
-        currentNetworwInfo();
+        currentNetworkInfo();
     }
 
-    public void currentNetworwInfo() {
+    public void currentNetworkInfo() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             requestPermissions(new String []{Manifest.permission.READ_PHONE_STATE}, 0);
             Log.d("Telephony", "request permission");
@@ -45,6 +45,7 @@ public class TelephonyActivity extends AppCompatActivity {
         String text = "";
         List<CellInfo> cellInfos = telephonyManager.getAllCellInfo();
         for (CellInfo cell : cellInfos) {
+            //4G
             if (cell instanceof CellInfoLte) {
                 CellInfoLte cellInfoLte = (CellInfoLte) cell;
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
@@ -56,13 +57,45 @@ public class TelephonyActivity extends AppCompatActivity {
                     text += cellInfoLte.getCellIdentity().getCi() + "\n";
                 }
             }
+            //3G
+
+            else if(cell instanceof CellInfoWcdma){
+                CellInfoWcdma cellInfoWcdma = (CellInfoWcdma) cell;
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) {
+                    // Código para versiones de Android anteriores a Android 9 (Pie)
+                    cellInfoWcdma.getCellIdentity().getMcc();
+                } else {
+                    // Código para versiones de Android 9 (Pie) en adelante
+                    String name = getString(R.string.texto3G2G);
+                    int asuLevel = cellInfoWcdma.getCellSignalStrength().getAsuLevel();
+                    int area3G = cellInfoWcdma.getCellIdentity().getLac();
+                    int cellID3G = cellInfoWcdma.getCellIdentity().getCid();
+                    String mccString = cellInfoWcdma.getCellIdentity().getMccString();
+                    String mncString = cellInfoWcdma.getCellIdentity().getMncString();
+                    int signalDbm = cellInfoWcdma.getCellSignalStrength().getDbm();
+
+                    int area = (area3G != 2147483647) ? area3G : 0;
+                    int cellID = (cellID3G != 2147483647) ? cellID3G : 0;
+                    String mcc = (mccString != null) ? mccString : "";
+                    String mnc = (mncString != null) ? ((mncString.charAt(0) == '0') ? mncString.substring(1) : mncString) : "";
+
+                    if (cellInfoWcdma.getCellSignalStrength().getDbm() > signalDbm) {
+                        signalDbm = cellInfoWcdma.getCellSignalStrength().getDbm();
+                    }
+
+                    text+=mccString +"\n";
+
+                    text+=mncString +"\n";
+
+                    text+=area3G +"\n";
+                }
+
+
+            }
+
         }
 
-        //text += telephonyManager.getVoiceNetworkType() + "\n";
-        //text += telephonyManager.getNetworkOperatorName() + "\n";
-        //text += telephonyManager.getDataNetworkType() + "\n";
-        textView.setText(text);
-        Log.d("Telephony", "permission granted");
+
     }
 
     @Override
@@ -71,7 +104,7 @@ public class TelephonyActivity extends AppCompatActivity {
         switch(requestCode){
             case 0:{
                 if(grantResults.length >0 && grantResults[0]==PackageManager.PERMISSION_GRANTED){
-                    currentNetworwInfo();
+                    currentNetworkInfo();
                 }else{
                     Toast.makeText(this,"Need permission to work", Toast.LENGTH_SHORT).show();
                 }

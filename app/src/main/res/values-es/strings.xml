@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">PROYECTO GPS</string>
+    <string name="app_name">UBICACIÓN EN ANDROID STUDIO</string>
     <string name="mapa">ESTUDIO GPS</string>
     <string name="cobertura">COBERTURA ACTUAL</string>
     <string name="grafica">ESTADISTICAS</string>
