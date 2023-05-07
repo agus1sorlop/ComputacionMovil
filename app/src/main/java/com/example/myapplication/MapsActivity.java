@@ -352,11 +352,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         return signal;
     }
 
-<<<<<<< HEAD
-
-=======
     // Vamos a obtener el nivel medio de señal que tienen las celdas que hay en nuestra ubicación
->>>>>>> master
     public double getHalfLevel() {
         StringBuilder text = new StringBuilder();
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -474,15 +470,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             cellId = cellLocation.getCi();
         } else {
             return;
-<<<<<<< HEAD
         }
-=======
-        int mcc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(0, 3));
-        int mnc = Integer.parseInt(telephonyManager.getNetworkOperator().substring(3));
-        int lac = cellLocation.getLac();
-        int cellId = cellLocation.getCid();
         // Realizaremos una cosulta para obtener los datos de la antena a la que estamos conectados
->>>>>>> master
+
         String url = "https://data.mongodb-api.com/app/data-fcpji/endpoint/db/getcellinfo?mcc=" + mcc + "&mnc=" + mnc + "&area=" + lac + "&cellid=" + cellId;
 
         URL obj = new URL(url);

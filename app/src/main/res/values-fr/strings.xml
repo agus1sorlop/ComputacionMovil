@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">LOCALISATION DANS ANDROID STUDIO</string>
+    <string name="app_name">LOCALISATION SUR LES RÉSEAUX MOBILES</string>
     <string name="mapa">ÉTUDE GPS</string>
     <string name="cobertura">RÉSEAU ACTUELLE</string>
     <string name="grafica">STATISTIQUES</string>

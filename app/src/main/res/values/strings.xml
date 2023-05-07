@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">UBICACIÓN EN ANDROID STUDIO</string>
     <string name="info" translatable="false">INFO</string>
     <string name="mapa">ESTUDIO GPS</string>
     <string name="cobertura">COBERTURA ACTUAL</string>
@@ -9,6 +8,7 @@
     <string name="etapa">NUEVA ETAPA</string>
     <string name="texto4G" translatable="false">4G</string>
     <string name="texto3G2G" translatable="false">3G</string>
+    <string name="app_name">UBICACIÓN EN REDES MÓVILES</string>
 
 
 </resources>
